@@ -1,3 +1,10 @@
+<script>
+mkdir "C:\Inetpub\wwwroot\demo"
+icacls "C:\Inetpub\wwwroot\demo" /grant "IIS AppPool\demo":(OI)(CI)M /T
+mkdir "C:\tools\php81"
+icacls "C:\tools\php81" /grant "IIS_IUSRS":(OI)(CI)M /T
+</script>
+
 <powershell>
 
 #install chocolatey
@@ -25,14 +32,7 @@ Invoke-WebRequest -Uri $wordpressUrl -OutFile $wordpressZipFilePath
 $iisWebDirectoryPath = "C:\Inetpub\wwwroot"
 Expand-Archive $wordpressZipFilePath -DestinationPath $iisWebDirectoryPath 
 Rename-Item "$iisWebDirectoryPath\wordpress" "$iisWebDirectoryPath\$websiteName"
-</powershell>
 
-<script>
-icacls "C:\Inetpub\wwwroot\demo" /grant "IIS AppPool\demo":(OI)(CI)M /T
-icacls "C:\tools\php81" /grant "IIS_IUSRS":(OI)(CI)M /T
-</script>
-
-<powershell>
 #configure iis
 Disable-WindowsOptionalFeature -Online -FeatureName IIS-DirectoryBrowsing $url = "https://cdn.localwp.com/stable/latest/windows"
 
