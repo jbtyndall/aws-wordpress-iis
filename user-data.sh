@@ -1,4 +1,4 @@
- <powershell>
+<powershell>
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 Install-WindowsFeature -name Web-Server -IncludeManagementTools
@@ -47,4 +47,6 @@ $acl.SetAccessRule($accessRule)
 $acl | Set-Acl $phpDirectoryPath
 
 New-WebHandler -Name "FastCGI" -Path "*.php" -Verb "*" -Modules "FastCgiModule" -ResourceType "File" -ScriptProcessor "$phpDirectoryPath\php-cgi.exe"
+Add-WebConfiguration "system.webServer/fastCGI" -Value @{"fullPath" = "$phpDirectoryPath\php-cgi.exe"}
+
 </powershell> 
