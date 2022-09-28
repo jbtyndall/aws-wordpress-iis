@@ -1,8 +1,8 @@
 <script>
 mkdir "C:\Inetpub\wwwroot\demo"
-icacls "C:\Inetpub\wwwroot\demo" /grant "IIS AppPool\demo":(OI)(CI)M /T
+icacls "C:\Inetpub\wwwroot\demo" /grant "IIS AppPool\demo":(OI)(CI)M /T /inheritance:e
 mkdir "C:\tools\php81"
-icacls "C:\tools\php81" /grant "IIS_IUSRS":(OI)(CI)M /T
+icacls "C:\tools\php81" /grant "IIS_IUSRS":(OI)(CI)M /T /inheritance:e
 </script>
 
 <powershell>
