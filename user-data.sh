@@ -30,7 +30,7 @@ Rename-Item "$iisWebDirectoryPath\wordpress" "$iisWebDirectoryPath\$websiteName"
 Disable-WindowsOptionalFeature -Online -FeatureName IIS-DirectoryBrowsing $url = "https://cdn.localwp.com/stable/latest/windows"
 
 Import-Module WebAdministration
-Remove-Website -Name "Default Website"
+Remove-Website -Name "Default Web Site"
 
 New-WebAppPool -Name $websiteName -Force 
 New-Website -Name $websiteName -PhysicalPath "$iisWebDirectoryPath\$websiteName" -ApplicationPool $websiteName -Force
