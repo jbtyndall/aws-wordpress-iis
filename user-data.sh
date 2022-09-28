@@ -1,11 +1,4 @@
-<script>
-mkdir "C:\Inetpub\wwwroot\demo"
-icacls "C:\Inetpub\wwwroot\demo" /grant "IIS AppPool\demo":(OI)(CI)M /T /inheritance:e
-mkdir "C:\tools\php81"
-icacls "C:\tools\php81" /grant "IIS_IUSRS":(OI)(CI)M /T /inheritance:e
-</script>
-
-<powershell>
+ <powershell>
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 Install-WindowsFeature -name Web-Server -IncludeManagementTools
@@ -17,27 +10,40 @@ choco install webdeploy -y
 choco install urlrewrite -y
 choco install php -y
 
+Disable-WindowsOptionalFeature -Online -FeatureName IIS-DirectoryBrowsing $url = "https://cdn.localwp.com/stable/latest/windows"
+
+$iisWebDirectoryPath = "C:\Inetpub\wwwroot"
 $websiteName = "demo"
+
+Import-Module WebAdministration
+Remove-Website -Name "Default Web Site"
+Get-ChildItem $iisWebDirectoryPath -Recurse | Remove-Item -Recurse -Force 
 
 $wordpressUrl = "https://wordpress.org/latest.zip"
 $tempDirectoryPath = "C:\Windows\Temp"
 $wordpressZipFilePath = "$tempDirectoryPath\wordpress.zip"
 Invoke-WebRequest -Uri $wordpressUrl -OutFile $wordpressZipFilePath
-$iisWebDirectoryPath = "C:\Inetpub\wwwroot"
 Expand-Archive $wordpressZipFilePath -DestinationPath $iisWebDirectoryPath 
 Rename-Item "$iisWebDirectoryPath\wordpress" "$iisWebDirectoryPath\$websiteName"
 
-Disable-WindowsOptionalFeature -Online -FeatureName IIS-DirectoryBrowsing $url = "https://cdn.localwp.com/stable/latest/windows"
-
-Import-Module WebAdministration
-Remove-Website -Name "Default Web Site"
-
 New-WebAppPool -Name $websiteName -Force 
 New-Website -Name $websiteName -PhysicalPath "$iisWebDirectoryPath\$websiteName" -ApplicationPool $websiteName -Force
+
+$acl = Get-Acl "$iisWebDirectoryPath\$websiteName"
+$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("IIS APPPOOL\demo","Modify, Synchronize", "ContainerInherit, ObjectInherit", "None", "Allow")
+$acl.SetAccessRule($accessRule)
+$acl | Set-Acl "$iisWebDirectoryPath\$websiteName"
+
 Add-WebConfigurationProperty -Filter "//defaultDocument/files" -PSPath "IIS:\sites\$websiteName" -AtIndex 0 -Name "Collection" -Value "index.php"
 
 Rename-Item "$iisWebDirectoryPath\$websiteName\wp-config-sample.php" "$iisWebDirectoryPath\$websiteName\wp-config.php" -Force
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jbtyndall/aws-wordpress-iis/main/php.ini" -OutFile "C:\tools\php81\php.ini"
 
-New-WebHandler -Name "FastCGI" -Path "*.php" -Verb "*" -Modules "FastCgiModule" -ResourceType "File" -ScriptProcessor "C:\tools\php81\php-cgi.exe"
-</powershell>
+$phpDirectoryPath = "C:\tools\php81"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jbtyndall/aws-wordpress-iis/main/php.ini" -OutFile "$phpDirectoryPath\php.ini"
+$acl = Get-Acl $phpDirectoryPath
+$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\IIS_IUSRS","Modify, Synchronize", "ContainerInherit, ObjectInherit", "None", "Allow")
+$acl.SetAccessRule($accessRule)
+$acl | Set-Acl $phpDirectoryPath
+
+New-WebHandler -Name "FastCGI" -Path "*.php" -Verb "*" -Modules "FastCgiModule" -ResourceType "File" -ScriptProcessor "$phpDirectoryPath\php-cgi.exe"
+</powershell> 
