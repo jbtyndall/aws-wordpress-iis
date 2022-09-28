@@ -37,7 +37,7 @@ New-Website -Name $websiteName -PhysicalPath "$iisWebDirectoryPath\$websiteName"
 Add-WebConfigurationProperty -Filter "//defaultDocument/files" -PSPath "IIS:\sites\$websiteName" -AtIndex 0 -Name "Collection" -Value "index.php"
 
 Rename-Item "$iisWebDirectoryPath\$websiteName\wp-config-sample.php" "$iisWebDirectoryPath\$websiteName\wp-config.php" -Force
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jbtyndall/aws-wordpress-iis/main/php.ini" -OutFile "C:\tools\php81\php.ini" -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jbtyndall/aws-wordpress-iis/main/php.ini" -OutFile "C:\tools\php81\php.ini"
 
 New-WebHandler -Name "FastCGI" -Path "*.php" -Verb "*" -Modules "FastCgiModule" -ResourceType "File" -ScriptProcessor "C:\tools\php81\php-cgi.exe"
 </powershell>
