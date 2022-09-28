@@ -36,7 +36,8 @@ $acl | Set-Acl "$iisWebDirectoryPath\$websiteName"
 
 Add-WebConfigurationProperty -Filter "//defaultDocument/files" -PSPath "IIS:\sites\$websiteName" -AtIndex 0 -Name "Collection" -Value "index.php"
 
-Rename-Item "$iisWebDirectoryPath\$websiteName\wp-config-sample.php" "$iisWebDirectoryPath\$websiteName\wp-config.php" -Force
+#Rename-Item "$iisWebDirectoryPath\$websiteName\wp-config-sample.php" "$iisWebDirectoryPath\$websiteName\wp-config.php" -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jbtyndall/aws-wordpress-iis/main/wp-config.php" -OutFile "$iisWebDirectoryPath\$websiteName\wp-config.php"
 
 $phpDirectoryPath = "C:\tools\php81"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jbtyndall/aws-wordpress-iis/main/php.ini" -OutFile "$phpDirectoryPath\php.ini"
